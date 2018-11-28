@@ -1,71 +1,114 @@
 import React from 'react';
-import { StyleSheet, View } from 'react-native';
-import { BarChart, XAxis, Grid, YAxis } from 'react-native-svg-charts'
-import * as scale from 'd3-scale'
+import { StyleSheet, View, Text, AsyncStorage, Keyboard} from 'react-native';
+import { BarChart, XAxis, Grid, YAxis, LineChart } from 'react-native-svg-charts';
+import { VictoryBar, VictoryChart, VictoryTheme,VictoryAxis } from "victory-native";
+import { Container, Header, Left, Body, Right, Button, Icon, Title, Label, Form, Item, Input, Content } from 'native-base';
+
+import * as scale from 'd3-scale';
+
 export default class GraphFinacial extends React.PureComponent {
   static navigationOptions = {
-    title: 'Money saved',
+   header: null
   };
 
+  constructor(props) {
+    super(props);
+    this.state = {
+          QArray: [],
+          moneySpent : 0,
+          totalspent: 95,
+         
+    }
+  }
+
+  componentWillUnmount() {
+    this.didFocusListener.remove();
+    
+  }
+
+  componentDidMount() {
+    Keyboard.dismiss();
+    this.didFocusListener = this.props.navigation.addListener(
+      'didFocus', () => {
+        AsyncStorage.getItem('PA').then((result) => {
+          if (result != null) {
+            this.setState({
+              moneySpent: JSON.parse(result)
+            })
+          }
+          console.log("look here u jibai graph" + this.state.moneySpent)
+
+        }).catch((response) => {
+          console.log(response)
+        
+        })
+      }
+    )
+  }
+ 
+
   render() {
-    const data = [
-      {
-        value: 50,
-        label: 'Mon',
-      },
-      {
-        value: 10,
-        label: 'Tue',
-      },
-      {
-        value: 40,
-        label: 'Wed',
-      },
-      {
-        value: 95,
-        label: 'Thur',
-      },
-      {
-        value: 85,
-        label: 'Fri',
-      },
+   console.log(this.state.moneySpent)
+    let data=[
+      {date: "Mon", money: 12},
+      {date: "Tues", money: 13},
+      {date: "Wed", money: 15},
+      {date: "Thurs", money:  17},
+      {date: "Fri", money: 18},
+      {date: "Sat", money:20},
+      {date: "Sun", money: this.state.moneySpent*1},
     ]
 
+
+
     return (
-      <View style={{ flexDirection: 'column', height: 200, paddingVertical: 16 }}>
- 
-        <BarChart
-          style={{ flex: 1, marginLeft: 8 }}
-          data={data}
+      <Container>
+        <Header style={styles.HeaderContainer} >
+          <Body >
+            <Title style={styles.TitleContainer}>Money Saved</Title>
+          </Body>
+          <Right>
+            <Button transparent onPress={() => this.props.navigation.navigate("Chart")}>
 
-          yAccessor={({ item }) => item.value}
-          svg={{ fill: 'rgba(134, 65, 244, 0.8)' }}
-          contentInset={{ top: 10, bottom: 10 }}
-          spacing={0.2}
-          gridMin={0}
-        >
-          <Grid />
-        </BarChart>
+              <Icon style={styles.IconContainer} name='ios-arrow-forward' />
+            </Button>
+          </Right>
+        </Header>
+     
 
-        <XAxis
-                    data={data}
-                    svg={{
-                        fill: 'black',
-                        fontSize: 8,
-                        fontWeight: 'bold',
-                        rotation: 20,
-                        originY: 30,
-                        y: 5,
-                    }}
-                    xAccessor={({ item }) => item.date}
-                    scale={scale.scaleTime}
-                    numberOfTicks={6}
-                    style={{ marginHorizontal: -15, height: 20 }}
-                    contentInset={{ left: 10, right: 25 }}
-                  />
-       
-      </View>
+      <View style={styles.container}>
+      
+        <Text>Total amount spent on Cigarettes: $ {this.state.moneySpent*1 + this.state.totalspent}</Text>
 
+          <VictoryChart
+          width={380}
+          theme={VictoryTheme.material}
+          domainPadding={10}
+          animate={{
+            duration: 2000,
+            onLoad: { duration: 1000 }
+          }}
+          >
+             
+    
+            <VictoryBar 
+            data={data}
+            // categories={{date: ["Mon", "Tues", "Wed", "Thurs", "Fri", "Sat", "Sun"] }}
+            labels={(d) => d.money}
+            x = "date"
+            y = "money"
+           
+             
+
+          />
+          </VictoryChart>
+
+          <Button title="hello" onPress = {this.switchToStack}>
+
+          </Button>
+        </View>
+        </Container>
+        
     );
   }
 }
@@ -75,5 +118,17 @@ const styles = StyleSheet.create({
     flex: 1,
     paddingTop: 15,
     backgroundColor: '#fff',
+    
   },
+  TitleContainer: {
+    fontSize: 16,
+    color: 'white'
+
+  },
+  HeaderContainer:{
+    backgroundColor: '#426DCB',
+  },
+  IconContainer:{
+    color: 'white'
+  }
 });
