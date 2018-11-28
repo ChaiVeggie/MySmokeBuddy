@@ -1,5 +1,7 @@
 # MySmokeBuddy
 
+Note: Only runs on IOS devices
+
 to install React Native run this command:
   npm install -g react-native-cli
 
